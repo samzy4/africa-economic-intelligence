@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Africa Economic Intelligence | First Release</title>
+<style>
+:root{--bg:#f4f7fb;--panel:#fff;--ink:#142238;--muted:#637188;--line:#e1e8f0;--navy:#102744;--blue:#2c67d8;--teal:#128778;--orange:#d97706}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+header{background:linear-gradient(120deg,#102744,#174b68);color:white;padding:30px max(20px,calc((100% - 1180px)/2)) 28px}
+.eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:11px;font-weight:800;color:#9ee4d7}
+h1{font-size:clamp(27px,4vw,40px);line-height:1.1;margin:8px 0 10px}header p{max-width:720px;color:#d5e2ef;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding:22px 18px 50px}
+.toolbar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:18px}
+select,button,input{font:inherit;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;color:var(--ink)}
+button{background:var(--blue);color:white;border:0;font-weight:700;cursor:pointer}button.secondary{background:#edf3ff;color:#234e9c}button:hover{filter:brightness(.96)}
+.status{font-size:13px;color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 3px 14px #18345108}
+.metric-label{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.metric{font-size:clamp(23px,3vw,32px);font-weight:800;letter-spacing:-.04em;margin:9px 0 3px}
+.sub{font-size:12px;color:var(--muted)}.section{margin-top:22px}.section-head{display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:12px}
+h2{font-size:20px;margin:0}h3{font-size:16px;margin:0 0 12px}.two{display:grid;grid-template-columns:1.35fr 1fr;gap:14px}
+.chartbox{height:260px;position:relative}.chartbox canvas{width:100%;height:100%}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+label{display:block;font-size:12px;color:var(--muted);font-weight:700;margin:10px 0 5px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.result{background:#eef7f5;border:1px solid #cfe9e4;border-radius:12px;padding:14px;margin-top:12px}.result strong{font-size:24px;color:#087566}
+.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:11px 9px;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.note{font-size:12px;color:var(--muted)}.tag{display:inline-block;border-radius:100px;padding:4px 8px;background:#edf3ff;color:#2b57a0;font-size:11px;font-weight:800}
+footer{margin-top:24px;border-top:1px solid var(--line);padding-top:18px;color:var(--muted);font-size:12px}
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.two{grid-template-columns:1fr}}
+@media(max-width:480px){.grid{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.wrap{padding-left:12px;padding-right:12px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">Independent economic data project · First release</div>
+  <h1>Africa Economic Intelligence</h1>
+  <p>Clear economic indicators for people and businesses. Starting with Nigeria, built to expand across Africa using transparent sources and practical tools.</p>
+</header>
+<main class="wrap">
+  <div class="toolbar">
+    <div>
+      <label for="country" style="margin-top:0">Country</label>
+      <select id="country">
+        <option value="NGA">Nigeria</option><option value="GHA">Ghana</option><option value="KEN">Kenya</option>
+        <option value="ZAF">South Africa</option><option value="EGY">Egypt</option><option value="SEN">Senegal</option>
+        <option value="USA">United States</option><option value="GBR">United Kingdom</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <span id="status" class="status">Ready to load public data</span>
+      <button id="refresh">Refresh indicators</button>
+    </div>
+  </div>
+  <section class="grid" aria-label="Key indicators">
+    <div class="card"><div class="metric-label">GDP growth</div><div class="metric" id="gdp">—</div><div class="sub" id="gdp-year">Annual % change</div></div>
+    <div class="card"><div class="metric-label">Inflation</div><div class="metric" id="inflation">—</div><div class="sub" id="inflation-year">Consumer prices, annual %</div></div>
+    <div class="card"><div class="metric-label">Unemployment</div><div class="metric" id="unemployment">—</div><div class="sub" id="unemployment-year">Modeled ILO estimate, %</div></div>
+    <div class="card"><div class="metric-label">GDP per person</div><div class="metric" id="gdpper">—</div><div class="sub" id="gdpper-year">Current US dollars</div></div>
+  </section>
+
+  <section class="section two">
+    <div class="card">
+      <div class="section-head"><div><h2>Economic trend</h2><div class="note">Annual inflation and GDP growth, latest available years</div></div><span class="tag">World Bank data</span></div>
+      <div class="chartbox"><canvas id="trend" aria-label="Inflation and GDP growth chart"></canvas></div>
+      <div class="legend"><span><i class="dot" style="background:#2c67d8"></i>Inflation</span><span><i class="dot" style="background:#128778"></i>GDP growth</span></div>
+    </div>
+    <div class="card">
+      <h2>Business profit calculator</h2>
+      <p class="note">Estimate your selling price and profit. This is a planning tool, not a forecast.</p>
+      <div class="formgrid">
+        <div><label for="cost">Cost per item (₦)</label><input id="cost" type="number" min="0" value="5000"></div>
+        <div><label for="extra">Other cost per item (₦)</label><input id="extra" type="number" min="0" value="500"></div>
+        <div><label for="price">Selling price (₦)</label><input id="price" type="number" min="0" value="7000"></div>
+        <div><label for="quantity">Items sold</label><input id="quantity" type="number" min="0" value="30"></div>
+      </div>
+      <div class="result"><div class="note">Estimated total profit</div><strong id="profit">₦45,000</strong><div class="note" id="margin">Profit margin: 21.4%</div></div>
+    </div>
+  </section>
+
+  <section class="section card">
+    <div class="section-head"><div><h2>Indicator history</h2><div class="note">Annual values reported by the World Bank API</div></div><span id="data-year" class="tag">Waiting for data</span></div>
+    <div class="tablewrap"><table><thead><tr><th>Year</th><th>Inflation</th><th>GDP growth</th><th>Unemployment</th><th>GDP per person</th></tr></thead><tbody id="history"><tr><td colspan="5">Choose a country and refresh indicators to load data.</td></tr></tbody></table></div>
+  </section>
+
+  <section class="section two">
+    <div class="card">
+      <h2>Local market price tracker</h2>
+      <p class="note">Add prices you personally observe. These entries stay in this browser session and are not uploaded anywhere.</p>
+      <div class="formgrid">
+        <div><label for="city">City / market</label><input id="city" placeholder="e.g. Mushin market"></div>
+        <div><label for="product">Product</label><input id="product" placeholder="e.g. rice"></div>
+        <div><label for="unit">Unit</label><input id="unit" placeholder="e.g. 1 kg, 1 litre"></div>
+        <div><label for="localprice">Observed price (₦)</label><input id="localprice" type="number" min="0" placeholder="e.g. 2500"></div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap"><button id="addprice">Add observation</button><button id="clearprices" class="secondary">Clear entries</button></div>
+    </div>
+    <div class="card">
+      <h3>Your price observations</h3>
+      <div class="tablewrap"><table><thead><tr><th>Date</th><th>Market</th><th>Product / unit</th><th>Price</th></tr></thead><tbody id="prices"><tr><td colspan="4">No local observations added yet.</td></tr></tbody></table></div>
+      <p class="note">Local observations are user-collected, not official national statistics. Record the date and unit consistently when comparing prices.</p>
+    </div>
+  </section>
+  <footer>
+    <strong>Data transparency:</strong> National indicators are requested from the World Bank Indicators API (api.worldbank.org). The latest available year differs by indicator and country; missing values are shown as unavailable. Inflation measures consumer-price changes and is not the same as the price of one item in a local market.
+    <br><br>Project prototype · Not investment advice · Built with a single HTML file and no paid libraries.
+  </footer>
+</main>
+<script>
+const indicators = {
+  gdp: {id:'NY.GDP.MKTP.KD.ZG', el:'gdp', label:'GDP growth'},
+  inflation: {id:'FP.CPI.TOTL.ZG', el:'inflation', label:'Inflation'},
+  unemployment: {id:'SL.UEM.TOTL.ZS', el:'unemployment', label:'Unemployment'},
+  gdpper: {id:'NY.GDP.PCAP.CD', el:'gdpper', label:'GDP per person'}
+};
+let currentData = {};
+const fmtPct = v => v == null ? 'Unavailable' : `${v.toFixed(1)}%`;
+const fmtUsd = v => v == null ? 'Unavailable' : new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v);
+const fmtNaira = v => new Intl.NumberFormat('en-NG',{style:'currency',currency:'NGN',maximumFractionDigits:2}).format(v);
+function latestValid(arr){return arr.find(x=>x.value!==null && Number.isFinite(Number(x.value)))}
+async function loadIndicator(country, key, def){
+  const url=`https://api.worldbank.org/v2/country/${country}/indicator/${def.id}?format=json&per_page=30`;
+  const res=await fetch(url); if(!res.ok) throw new Error('API request failed');
+  const json=await res.json();
+  const rows=(json[1]||[]).map(d=>({year:Number(d.date),value:d.value===null?null:Number(d.value)}));
+  return {key, rows, latest:latestValid(rows)};
+}
+function setMetric(key, result){
+  const latest=result.latest;
+  const value=latest?.value ?? null;
+  document.getElementById(key).textContent=key==='gdpper'?fmtUsd(value):fmtPct(value);
+  const yearEl=document.getElementById(key+'-year');
+  if(yearEl) yearEl.textContent=latest?`Latest available: ${latest.year}`:'No value available in returned years';
+}
+function drawChart(){
+  const canvas=document.getElementById('trend'), box=canvas.parentElement;
+  const dpr=window.devicePixelRatio||1, w=box.clientWidth, h=box.clientHeight;
+  canvas.width=w*dpr;canvas.height=h*dpr;const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,w,h);
+  const inflation=currentData.inflation?.rows||[], gdp=currentData.gdp?.rows||[];
+  const years=[...new Set([...inflation,...gdp].filter(x=>x.value!==null).map(x=>x.year))].sort((a,b)=>a-b).slice(-10);
+  if(!years.length){ctx.fillStyle='#637188';ctx.font='14px system-ui';ctx.fillText('Chart will appear when data loads.',12,30);return}
+  const series=[{rows:inflation,color:'#2c67d8'},{rows:gdp,color:'#128778'}];
+  const vals=series.flatMap(s=>years.map(y=>s.rows.find(x=>x.year===y)?.value).filter(v=>v!==undefined&&v!==null));
+  let min=Math.min(0,...vals),max=Math.max(5,...vals);if(max===min)max=min+1;
+  const pad={l:35,r:10,t:15,b:28},cw=w-pad.l-pad.r,ch=h-pad.t-pad.b;
+  const y=v=>pad.t+(max-v)/(max-min)*ch, x=i=>pad.l+(years.length===1?cw/2:i*cw/(years.length-1));
+  ctx.strokeStyle='#e1e8f0';ctx.lineWidth=1;ctx.fillStyle='#637188';ctx.font='10px system-ui';
+  for(let i=0;i<5;i++){const v=min+(max-min)*i/4,yy=y(v);ctx.beginPath();ctx.moveTo(pad.l,yy);ctx.lineTo(w-pad.r,yy);ctx.stroke();ctx.fillText(v.toFixed(0),2,yy+3)}
+  years.forEach((yr,i)=>{if(i%2===0||i===years.length-1)ctx.fillText(String(yr),x(i)-12,h-7)});
+  series.forEach(s=>{ctx.strokeStyle=s.color;ctx.lineWidth=2.5;ctx.beginPath();let started=false;
+    years.forEach((yr,i)=>{const v=s.rows.find(z=>z.year===yr)?.value;if(v===undefined||v===null){started=false;return}if(!started){ctx.moveTo(x(i),y(v));started=true}else ctx.lineTo(x(i),y(v));ctx.fillStyle=s.color;ctx.beginPath();ctx.arc(x(i),y(v),3,0,Math.PI*2);ctx.fill();});
+    // Draw continuous segments separately so missing years do not connect.
+    ctx.beginPath();let prev=false;years.forEach((yr,i)=>{const v=s.rows.find(z=>z.year===yr)?.value;if(v===undefined||v===null){prev=false;return}if(!prev)ctx.moveTo(x(i),y(v));else ctx.lineTo(x(i),y(v));prev=true});ctx.stroke();
+  });
+}
+function renderHistory(){
+  const years=[...new Set(Object.values(currentData).flatMap(d=>(d.rows||[]).filter(x=>x.value!==null).map(x=>x.year)))].sort((a,b)=>b-a).slice(0,12);
+  const tbody=document.getElementById('history');
+  if(!years.length){tbody.innerHTML='<tr><td colspan="5">No indicator values available.</td></tr>';return}
+  tbody.innerHTML=years.map(year=>{
+    const val=k=>{const row=(currentData[k]?.rows||[]).find(r=>r.year===year);if(!row||row.value===null)return '—';return k==='gdpper'?fmtUsd(row.value):fmtPct(row.value)};
+    return `<tr><td>${year}</td><td>${val('inflation')}</td><td>${val('gdp')}</td><td>${val('unemployment')}</td><td>${val('gdpper')}</td></tr>`;
+  }).join('');
+  document.getElementById('data-year').textContent=`${years[years.length-1]}–${years[0]} available`;
+}
+async function refresh(){
+  const country=document.getElementById('country').value;
+  const status=document.getElementById('status');status.textContent='Loading public data…';
+  document.getElementById('history').innerHTML='<tr><td colspan="5">Loading…</td></tr>';
+  try{
+    const entries=await Promise.all(Object.entries(indicators).map(async ([key,def])=>[key,await loadIndicator(country,key,def)]));
+    currentData=Object.fromEntries(entries.map(([key,result])=>[key,result]));
+    Object.keys(indicators).forEach(key=>setMetric(key,currentData[key]));
+    renderHistory();drawChart();
+    status.textContent='Updated from World Bank API';
+  }catch(e){
+    status.textContent='Could not load live data. Check your internet and try again.';
+    document.getElementById('history').innerHTML='<tr><td colspan="5">Data could not be loaded. You can still use the business calculator and local tracker.</td></tr>';
+    drawChart();
+  }
+}
+function calcProfit(){
+  const cost=Math.max(0,Number(document.getElementById('cost').value)||0);
+  const extra=Math.max(0,Number(document.getElementById('extra').value)||0);
+  const price=Math.max(0,Number(document.getElementById('price').value)||0);
+  const qty=Math.max(0,Number(document.getElementById('quantity').value)||0);
+  const unitProfit=price-cost-extra,total=unitProfit*qty,margin=price>0?unitProfit/price*100:0;
+  document.getElementById('profit').textContent=fmtNaira(total);
+  document.getElementById('margin').textContent=`Estimated profit per item: ${fmtNaira(unitProfit)} · Profit margin: ${margin.toFixed(1)}%`;
+}
+document.querySelectorAll('#cost,#extra,#price,#quantity').forEach(el=>el.addEventListener('input',calcProfit));
+document.getElementById('refresh').addEventListener('click',refresh);
+document.getElementById('country').addEventListener('change',refresh);
+document.getElementById('addprice').addEventListener('click',()=>{
+  const city=document.getElementById('city').value.trim(), product=document.getElementById('product').value.trim(), unit=document.getElementById('unit').value.trim(), price=Number(document.getElementById('localprice').value);
+  if(!city||!product||!unit||!Number.isFinite(price)||price<0){alert('Please fill in market, product, unit and a valid price.');return}
+  const row=document.createElement('tr');const date=new Date().toLocaleDateString();
+  [date,city,`${product} / ${unit}`,fmtNaira(price)].forEach(v=>{const td=document.createElement('td');td.textContent=v;row.appendChild(td)});
+  const tbody=document.getElementById('prices');if(tbody.querySelector('td[colspan]'))tbody.innerHTML='';tbody.prepend(row);
+  ['city','product','unit','localprice'].forEach(id=>document.getElementById(id).value='');
+});
+document.getElementById('clearprices').addEventListener('click',()=>{document.getElementById('prices').innerHTML='<tr><td colspan="4">No local observations added yet.</td></tr>'});
+window.addEventListener('resize',drawChart);calcProfit();refresh();
+</script>
+</body>
+</html>
